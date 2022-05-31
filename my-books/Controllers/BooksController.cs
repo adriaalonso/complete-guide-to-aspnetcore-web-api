@@ -11,7 +11,7 @@ namespace my_books.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        public BooksService _booksService;
+        private BooksService _booksService;
         public BooksController(BooksService booksService)
         {
             _booksService = booksService;
@@ -38,21 +38,21 @@ namespace my_books.Controllers
 
         }
 
-        [HttpPost("add-book")]
+        [HttpPost]
         public IActionResult AddBook([FromBody]BookVM book)
         {
             _booksService.AddBook(book);
             return Ok();
         }
 
-        [HttpPut("update-book-by-id/{id}")]
+        [HttpPut("{id}")]
         public IActionResult UpdateBookById(int id, [FromBody]BookVM book)
         {
             var updatedBook = _booksService.UpdateBookById(id, book);
             return Ok(updatedBook);
         }
 
-        [HttpDelete("delete-book-by-id/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteBookById(int id)
         {
             _booksService.DeleteBookById(id);
