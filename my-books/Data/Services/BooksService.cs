@@ -14,9 +14,28 @@ namespace my_books.Data.Services
             _context = context;
         }
 
-        public List<Book> GetallBooks() => _context.Books.ToList();
+        public List<Book> GetAllBooks() => _context.Books.ToList();
 
-        public Book GetBookById(int bookId) => _context.Books.FirstOrDefault(x => x.Id == bookId);
+        public BookWithAuthorsVM GetBookById(int bookId)
+        {
+            var _bookWithAuthorsVM = _context.Books
+                .Where(x => x.Id == bookId)
+                .Select(book =>  new BookWithAuthorsVM()
+                {
+                    Title = book.Title,
+                    Description = book.Description,
+                    IsRead = book.IsRead,
+                    DateRead = book.DateRead,
+                    Rate = book.Rate,
+                    Genre = book.Genre,
+                    CoverUrl = book.CoverUrl,
+                    DateAdded = book.DateAdded,
+                    PublisherName = book.Publisher.Name,
+                    AuthorNames = book.Book_Authors.Select(x => x.Author.FullName).ToList()
+                }).FirstOrDefault();
+
+            return _bookWithAuthorsVM;
+        }
 
         public void AddBook(BookVM book)
         {
@@ -28,13 +47,25 @@ namespace my_books.Data.Services
                 DateRead = book.DateRead,
                 Rate = book.Rate,
                 Genre = book.Genre,
-                Author = book.Author,
                 CoverUrl = book.CoverUrl,
-                DateAdded = DateTime.Now
+                DateAdded = DateTime.Now,
+                PublisherId = book.PublisherId
             };
 
             _context.Books.Add(_book);
             _context.SaveChanges();
+
+            foreach(var authorId in book.AuthorIds)
+            {
+                var _book_author = new Book_Author()
+                {
+                    BookId = _book.Id,
+                    AuthorId = authorId
+                };
+
+                _context.Books_Authors.Add(_book_author);
+                _context.SaveChanges();
+            }
         }
 
         public Book UpdateBookById(int bookId, BookVM book)
@@ -49,7 +80,6 @@ namespace my_books.Data.Services
                 _book.DateRead = book.IsRead ? book.DateRead.Value : null;
                 _book.Rate = book.IsRead ? book.Rate.Value : null;
                 _book.Genre = book.Genre;
-                _book.Author = book.Author;
                 _book.CoverUrl = book.CoverUrl;
 
                 _context.SaveChanges();

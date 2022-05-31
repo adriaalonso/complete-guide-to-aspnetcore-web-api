@@ -20,7 +20,7 @@ namespace my_books.Controllers
         [HttpGet]
         public IActionResult GetAllBooks()
         {
-            var books = _booksService.GetallBooks();
+            var books = _booksService.GetAllBooks();
             return Ok(books);
         }
 
